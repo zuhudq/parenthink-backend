@@ -8,13 +8,24 @@ const app = express();
 // ==========================================
 // 1. MIDDLEWARE GLOBAL
 // ==========================================
+// Konfigurasi CORS "Galak" untuk menangani Preflight
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:5173", "http://localhost:3000", "*"], // Izinkan localhost secara spesifik
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200, // Beberapa browser versi lama bermasalah dengan status 204
   }),
 );
+
+// WAJIB: Tangani preflight requests (OPTIONS) secara manual
+app.options("*", cors());
 app.use(express.json());
 
 // ==========================================
