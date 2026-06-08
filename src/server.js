@@ -34,15 +34,9 @@ app.get("/api", (req, res) => {
 // ==========================================
 // Karena server.js ada di dalam folder "src", kita harus naik 2 level (../../)
 // untuk menemukan folder "parenthink-frontend/dist"
-const frontendDistPath = path.join(__dirname, "../../parenthink-frontend/dist");
-
-// Serve frontend statis
-app.use(express.static(frontendDistPath));
-
-// Tangkap semua rute selain "/api" dan arahkan ke index.html milik React
-// WAJIB ditaruh di urutan paling bawah dari semua routing!
-app.get("*", (req, res) => {
-  res.sendFile(path.join(frontendDistPath, "index.html"));
+// Rute Utama Backend
+app.get("/", (req, res) => {
+  res.status(200).send("Selamat datang di API Parenthink!");
 });
 
 // ==========================================
