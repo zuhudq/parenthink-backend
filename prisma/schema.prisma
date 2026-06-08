@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tabel User (Orang Tua)
+model User {
+  id             String   @id
+  email          String   @unique
+  name           String?
+  parentingRole  String?  // Tambahan: Peran (Misal: Ayah, Ibu, Wali)
+  phoneNumber    String?  // Tambahan: Nomor HP (Opsional)
+  createdAt      DateTime @default(now())
+
+  children  Child[]
+  histories InteractionHistory[]
+}
+
+// Tabel Profil Anak
+model Child {
+  id              String   @id @default(uuid())
+  userId          String
+  name            String
+  dateOfBirth     DateTime
+  gender          String?  // Tambahan: Jenis Kelamin (Laki-laki/Perempuan)
+  allergies       String?  
+  specialNeeds    String?  
+  medicalHistory  String?  // Tambahan: Riwayat Medis/Penyakit (Opsional)
+  interests       String?  // Tambahan: Minat/Hobi anak (Bagus untuk rekomendasi konten)
+  createdAt       DateTime @default(now())
+  weight          Float?   @default(0)
+  height          Float?   @default(0)
+
+  user         User     @relation(fields: [userId], references: [id])
+  histories    InteractionHistory[]
+  trackers        DailyTracker[]
+}
+
+// Tabel Riwayat Interaksi (Untuk konteks AI nanti)
+model InteractionHistory {
+  id            String   @id @default(uuid())
+  userId        String
+  childId       String
+  issueCategory String   // Misal: "Tantrum", "GTM"
+  aiResponse    String   @db.Text
+  createdAt     DateTime @default(now())
+
+  // Relasi balik
+  user          User     @relation(fields: [userId], references: [id])
+  child         Child    @relation(fields: [childId], references: [id])
+}
+
+// Model untuk mencatat aktivitas harian anak
+model DailyTracker {
+  id          String   @id @default(uuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  
+  recordDate  DateTime @default(now()) // Tanggal pencatatan
+  
+  // Metrik Tracker
+  sleepHours  Int      @default(0) // Jam tidur
+  sleepMins   Int      @default(0) // Menit tidur
+  foodKcal    Int      @default(0) // Kalori makan
+  drinkMl     Int      @default(0) // Mililiter minum
+  pottyCount  Int      @default(0) // Jumlah BAK/BAB
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
